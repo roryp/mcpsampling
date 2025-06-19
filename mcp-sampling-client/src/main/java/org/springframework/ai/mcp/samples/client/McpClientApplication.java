@@ -77,6 +77,7 @@ public class McpClientApplication {
 			System.out.println("> ASSISTANT: " + chatClient.prompt(userQuestion).call().content());
 		};
 	}
+
 	@Bean
 	McpSyncClientCustomizer samplingCustomizer(OpenAiChatModel openAiChatModel) {
 
@@ -123,15 +124,17 @@ public class McpClientApplication {
 				} else {
 					// Use OpenAI for all other model hints
 					ChatClient openAiChatClient = ChatClient.builder(openAiChatModel).build();
-					
+
 					String response = openAiChatClient.prompt()
 							.system(llmRequest.systemPrompt())
 							.user(userPrompt)
 							.call()
 							.content();
 
-					return CreateMessageResult.builder().content(new McpSchema.TextContent(response)).build();				}
+					return CreateMessageResult.builder().content(new McpSchema.TextContent(response)).build();
+				}
 			});
-			System.out.println("Customizing " + name);		};
+			System.out.println("Customizing " + name);
+		};
 	}
 }
