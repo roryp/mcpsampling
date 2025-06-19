@@ -12,9 +12,8 @@ public class McpServerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(McpServerApplication.class, args);
 	}
-
 	@Bean
-	public ToolCallbackProvider weatherTools(WeatherService weatherService) {
-		return MethodToolCallbackProvider.builder().toolObjects(weatherService).build();
+	public ToolCallbackProvider calculatorTools(SimpleCalculatorService simpleCalculatorService) {
+		return MethodToolCallbackProvider.builder().toolObjects(simpleCalculatorService).build();
 	}
 }
