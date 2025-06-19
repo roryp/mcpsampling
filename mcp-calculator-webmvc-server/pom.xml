@@ -12,10 +12,10 @@
 
     <groupId>com.example</groupId>
 
-    <artifactId>mcp-sampling-weather-server</artifactId>
+    <artifactId>mcp-sampling-calculator-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>Spring AI MCP Sampling - Weather Server</name>
+    <name>Spring AI MCP Sampling - Calculator Server</name>
     <description>Sample Spring Boot application demonstrating MCP client and server sampling usage</description>
 
     <dependencyManagement>

@@ -1,74 +1,363 @@
-# Spring AI MCP Sampling Examples
+# MCP Sampling Demo - Spring AI Model Context Protocol
 
-This project demonstrates the Model Context Protocol (MCP) Sampling capability in Spring AI, showcasing how an MCP server can delegate requests to multiple LLM providers for creative content generation.
+A comprehensive demonstration of the Model Context Protocol (MCP) using Spring AI with multiple AI providers including OpenAI and Ollama. This project showcases how to build both MCP servers and clients that can route requests to different Large Language Models (LLMs) based on model preferences.
 
-## 🚀 Quick Start
+## 🏗️ Project Structure
 
-### Prerequisites
+This repository contains two main components:
 
-- Java 17 or later
-- Maven 3.6+
-- OpenAI API key
-- GitHub Models API key (for GPT-4o-mini access)
+- **`mcp-calculator-webmvc-server/`** - MCP server that provides calculator tools with creative AI-generated explanations
+- **`mcp-sampling-client/`** - MCP client that demonstrates routing requests to different AI providers
 
-### Environment Setup
+## 🚀 Prerequisites
 
-```bash
-export OPENAI_API_KEY=your-openai-key-here
-export GITHUB_TOKEN=your-github-token-here  # For GitHub Models access
-```
+Before running this project, ensure you have the following:
 
-### Running the Application
+### Required Software
+- **Java 17+** - Required for Spring Boot 3.x
+- **Maven 3.8+** - For building the projects
+- **Git** - For cloning the repository
 
-1. **Start the MCP Calculator Server**
+### Required AI Services
+
+#### 1. OpenAI API Token
+You'll need an OpenAI API key to use GPT models:
+
+1. Visit [OpenAI API Keys](https://platform.openai.com/api-keys)
+2. Create a new API key
+3. Set the environment variable:
    ```bash
-   cd mcp-calculator-webmvc-server
-   ./mvnw spring-boot:run
+   export OPENAI_API_KEY=your-openai-api-key-here
    ```
 
-2. **Run the MCP Sampling Client** (in another terminal)
+#### 2. Ollama (Local LLM)
+Install and configure Ollama for local model inference:
+
+1. **Install Ollama:**
+   - **Windows:** Download from [ollama.com](https://ollama.com/download)
+   - **macOS:** `brew install ollama`
+   - **Linux:** `curl -fsSL https://ollama.com/install.sh | sh`
+
+2. **Start Ollama service:**
    ```bash
-   cd mcp-sampling-client
-   ./mvnw spring-boot:run -Dspring-boot.run.arguments="--ai.user.input='Calculate 15 + 27 and explain it creatively'"
+   ollama serve
    ```
 
-## 📁 Project Structure
+3. **Pull a model** (recommended):
+   ```bash
+   ollama pull llama3.2
+   # or
+   ollama pull mistral
+   ```
 
+4. **Verify installation:**
+   ```bash
+   ollama list
+   ```
+
+   Ollama will run on `http://localhost:11434` by default.
+
+## 📦 Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd mcpsampling
 ```
-├── mcp-calculator-webmvc-server/     # MCP Server with calculator operations
-├── mcp-sampling-client/              # MCP Client with sampling capabilities
-├── README.md                         # This file
-└── .gitignore                       # Git ignore rules
-```
 
-## 🛠 Features
-
-- **Calculator Operations**: Add, subtract, multiply, divide
-- **Currency Conversion**: Real-time exchange rates via API
-- **MCP Sampling**: Delegate creative explanations to multiple LLM providers
-- **Multi-Model Support**: OpenAI and GitHub Models (GPT-4o-mini) integration
-- **Timeout Protection**: Robust error handling for external API calls
-
-## 🔧 Development
-
-### Building the Projects
+### 2. Set Environment Variables
+Create a `.env` file or set these environment variables:
 
 ```bash
-# Build calculator server
+# Required for OpenAI integration
+export OPENAI_API_KEY=your-openai-api-key-here
+
+# Optional: Customize Ollama endpoint (default: http://localhost:11434)
+export OLLAMA_BASE_URL=http://localhost:11434
+```
+
+### 3. Build the Projects
+```bash
+# Build the MCP server
 cd mcp-calculator-webmvc-server
-./mvnw clean install
+./mvnw clean install -DskipTests
 
-# Build sampling client
+# Build the MCP client
 cd ../mcp-sampling-client
-./mvnw clean install
+./mvnw clean install -DskipTests
 ```
+
+## 🏃 Running the Applications
+
+### Step 1: Start the MCP Server
+
+```bash
+cd mcp-calculator-webmvc-server
+java -jar target/mcp-calculator-webmvc-server-0.0.1-SNAPSHOT.jar
+```
+
+The server will start on `http://localhost:8080` and provide:
+- Calculator tools (add, subtract, multiply, divide)
+- Currency conversion with real-time exchange rates
+- Creative AI-generated explanations using multiple models
+
+### Step 2: Start Ollama (if not already running)
+
+```bash
+ollama serve
+```
+
+### Step 3: Run the MCP Client
+
+```bash
+cd mcp-sampling-client
+java -jar target/mcp-sampling-client-0.0.1-SNAPSHOT.jar
+```
+
+The client will:
+1. Connect to the MCP server
+2. Ask: "What is 2+2 and give me the result in EUR?"
+3. Route different parts of the response to different AI models
+4. Combine creative responses from both OpenAI and Ollama
+
+## 🔧 Configuration
+
+### Server Configuration (`mcp-calculator-webmvc-server/src/main/resources/application.properties`)
+
+```properties
+# Server identification
+spring.ai.mcp.server.name=calculator-server
+spring.ai.mcp.server.version=1.0.0
+
+# MCP Server settings
+spring.ai.mcp.server.type=SYNC
+spring.ai.mcp.server.stdio=false
+spring.ai.mcp.server.sse-message-endpoint=/mcp/message
+
+# Enable change notifications
+spring.ai.mcp.server.resource-change-notification=true
+spring.ai.mcp.server.tool-change-notification=true
+spring.ai.mcp.server.prompt-change-notification=true
+
+# Logging configuration
+logging.file.name=./target/mcp-sampling-server.log
+```
+
+### Client Configuration (`mcp-sampling-client/src/main/resources/application.properties`)
+
+```properties
+# OpenAI Configuration
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o-mini
+
+# Ollama Configuration  
+spring.ai.ollama.base-url=${OLLAMA_BASE_URL:http://localhost:11434}
+spring.ai.ollama.chat.options.model=llama3.2
+
+# MCP Client settings
+spring.ai.mcp.client.calculator.url=http://localhost:8080
+```
+
+## 🛠️ Available Tools
+
+The MCP server provides the following tools:
+
+### Calculator Operations
+- **`add`** - Addition of two numbers
+- **`subtract`** - Subtraction of two numbers  
+- **`multiply`** - Multiplication of two numbers
+- **`divide`** - Division of two numbers (with zero-division protection)
+
+### Currency Conversion
+- **`convertCurrency`** - Convert amounts between currencies using live exchange rates
+
+### Features
+- **Real-time exchange rates** from external APIs
+- **Creative explanations** generated by multiple AI models
+- **Model routing** based on preferences (OpenAI vs Ollama)
+- **Error handling** with graceful fallbacks
+
+## 🎯 How MCP Sampling Works
+
+This project demonstrates **MCP Sampling**, which allows an MCP server to delegate certain requests to different LLM providers:
+
+### Server-Side Implementation
+```java
+@Tool(description = "Add two numbers")
+public CalculationResult add(double a, double b, ToolContext toolContext) {
+    double result = a + b;
+    
+    // Use MCP Sampling to generate creative explanations
+    String creativeExplanation = callMcpSampling(toolContext, a, b, result, "addition");
+    
+    return new CalculationResult(result, creativeExplanation);
+}
+
+private String callMcpSampling(ToolContext toolContext, double a, double b, double result, String operation) {
+    // Route to OpenAI
+    CreateMessageResult openaiResponse = mcpExchange.createMessage(
+        CreateMessageRequest.builder()
+            .modelPreferences(ModelPreferences.builder().addHint("openai").build())
+            .systemPrompt("Generate a creative explanation for this math operation")
+            .addMessage(new TextContent("Explain: " + a + " + " + b + " = " + result))
+            .build()
+    );
+    
+    // Route to Ollama  
+    CreateMessageResult ollamaResponse = mcpExchange.createMessage(
+        CreateMessageRequest.builder()
+            .modelPreferences(ModelPreferences.builder().addHint("ollama").build())
+            .systemPrompt("Create a poetic response about this calculation")
+            .addMessage(new TextContent("Make a poem about: " + a + " + " + b + " = " + result))
+            .build()
+    );
+    
+    return combineResponses(openaiResponse, ollamaResponse);
+}
+```
+
+### Client-Side Routing
+```java
+@Bean
+McpSyncClientCustomizer samplingCustomizer(Map<String, ChatClient> chatClients, OllamaChatModel ollamaChatModel) {
+    return (name, mcpClientSpec) -> {
+        mcpClientSpec.sampling(llmRequest -> {
+            String modelHint = llmRequest.modelPreferences().hints().get(0).name();
+            
+            if ("ollama".equals(modelHint)) {
+                // Route to Ollama
+                return ChatClient.builder(ollamaChatModel)
+                    .build()
+                    .prompt()
+                    .system(llmRequest.systemPrompt())
+                    .user(userPrompt)
+                    .call()
+                    .content();
+            } else {
+                // Route to OpenAI or other providers
+                ChatClient hintedChatClient = chatClients.entrySet().stream()
+                    .filter(e -> e.getKey().contains(modelHint))
+                    .findFirst()
+                    .orElseThrow()
+                    .getValue();
+                    
+                return hintedChatClient.prompt()
+                    .system(llmRequest.systemPrompt())
+                    .user(userPrompt)
+                    .call()
+                    .content();
+            }
+        });
+    };
+}
+```
+
+## 🧪 Testing
+
+### Run Unit Tests
+```bash
+cd mcp-calculator-webmvc-server
+./mvnw test
+
+cd ../mcp-sampling-client  
+./mvnw test
+```
+
+### Manual Testing
+You can test the MCP server directly using HTTP requests:
+
+```bash
+# Test calculator endpoint
+curl -X POST http://localhost:8080/mcp/message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "add",
+      "arguments": {"a": 5, "b": 3}
+    }
+  }'
+```
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+#### "OpenAI API key not found"
+```bash
+# Make sure the environment variable is set
+echo $OPENAI_API_KEY
+
+# If empty, set it:
+export OPENAI_API_KEY=your-key-here
+```
+
+#### "Cannot connect to Ollama"
+```bash
+# Check if Ollama is running
+curl http://localhost:11434/api/version
+
+# If not running, start it:
+ollama serve
+
+# Check if you have models installed:
+ollama list
+```
+
+#### "Connection refused to localhost:8080"
+- Ensure the MCP server is running first
+- Check server logs for any startup errors
+- Verify port 8080 is available
+
+#### Maven build failures
+```bash
+# Clean and rebuild
+./mvnw clean install -DskipTests -U
+
+# Check Java version
+java -version  # Should be 17+
+```
+
+## 📚 Learn More
+
+### Documentation
+- [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
+- [Model Context Protocol Specification](https://modelcontextprotocol.github.io/specification/)
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Ollama Documentation](https://ollama.com/docs)
+
+### Key Concepts
+- **MCP (Model Context Protocol)** - Standard for connecting AI models with data sources
+- **Spring AI** - Spring framework integration for AI applications  
+- **Tool Calling** - Allowing AI models to execute functions/tools
+- **Model Routing** - Directing requests to different AI providers based on criteria
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is part of the Spring AI examples and follows the Spring AI licensing terms.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
-## 🔗 Links
+## 🆘 Support
 
-- [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
-- [Model Context Protocol Specification](https://modelcontextprotocol.github.io/specification/)
-- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/)
+If you encounter issues:
+
+1. Check the [Troubleshooting](#-troubleshooting) section
+2. Review server logs: `tail -f mcp-calculator-webmvc-server/target/mcp-sampling-server.log`
+3. Open an issue on GitHub with:
+   - Your operating system
+   - Java version (`java -version`)
+   - Error logs
+   - Steps to reproduce
+
+---
+
+**Happy coding with Model Context Protocol! 🚀**
