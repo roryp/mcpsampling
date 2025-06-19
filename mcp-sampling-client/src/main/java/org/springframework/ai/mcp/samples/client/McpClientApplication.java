@@ -56,7 +56,6 @@ public class McpClientApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(McpClientApplication.class, args).close();
-		;
 	}
 
 	@Bean
