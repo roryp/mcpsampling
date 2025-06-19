@@ -1,0 +1,49 @@
+# Build artifacts
+**/target/
+*.jar
+!**/src/**/*.jar
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/MavenWrapperDownloader.java
+
+# Environment variables
+.env
+.env.local
+
+# API Keys (security)
+**/application-local.properties
+**/application-dev.properties
+application-secrets.properties
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# JetBrains
+out/
