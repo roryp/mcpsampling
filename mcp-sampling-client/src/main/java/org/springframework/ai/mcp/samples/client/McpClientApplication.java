@@ -71,7 +71,7 @@ public class McpClientApplication {
 
 			String userQuestion = """
 					What is 2+2 and give me the result in EUR?
-					Please incorporate all createive responses from all LLM providers.
+					Please incorporate all creative responses from all LLM providers.
 					After the other providers add a poem that synthesizes the the poems from all the other providers.
 					""";
 
