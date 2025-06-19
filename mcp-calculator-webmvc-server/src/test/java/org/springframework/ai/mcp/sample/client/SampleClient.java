@@ -57,9 +57,10 @@ public class SampleClient {
 		// List and demonstrate tools
 		ListToolsResult toolsList = client.listTools();
 		System.out.println("Available Tools = " + toolsList);
-		CallToolResult calculationResult = client.callTool(new CallToolRequest("add",
-				Map.of("a", 15.0, "b", 27.0)));
-		System.out.println("Calculation Result: " + calculationResult);
+
+		CallToolResult weatherForcastResult = client.callTool(new CallToolRequest("getTemperature",
+				Map.of("latitude", "47.6062", "longitude", "-122.3321", "toolContext", new ToolContext(Map.of()))));
+		System.out.println("Weather Forcast: " + weatherForcastResult);
 
 		client.closeGracefully();
 

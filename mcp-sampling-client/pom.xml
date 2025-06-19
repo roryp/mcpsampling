@@ -42,11 +42,9 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-openai</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>com.azure</groupId>
-			<artifactId>azure-ai-inference</artifactId>
-			<version>1.0.0-beta.5</version>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-starter-model-ollama</artifactId>
 		</dependency>
 
 	</dependencies>

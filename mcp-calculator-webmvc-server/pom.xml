@@ -12,11 +12,11 @@
 
     <groupId>com.example</groupId>
 
-    <artifactId>mcp-calculator-server</artifactId>
+    <artifactId>mcp-sampling-weather-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>Spring AI MCP calculator server</name>
-    <description>Sample Spring Boot application demonstrating MCP server with calculator operations and currency conversion</description>
+    <name>Spring AI MCP Sampling - Weather Server</name>
+    <description>Sample Spring Boot application demonstrating MCP client and server sampling usage</description>
 
     <dependencyManagement>
         <dependencies>
@@ -28,15 +28,12 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>    <dependencies>
+    </dependencyManagement>
+
+    <dependencies>
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
