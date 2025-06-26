@@ -1,4 +1,4 @@
-# MCP Sampling Demo - Spring AI Model Context Protocol
+# MCP Sampling Demo
 
 A comprehensive demonstration of the Model Context Protocol (MCP) using Spring AI with multiple AI providers including OpenAI and Ollama. This project showcases how to build both MCP servers and clients that can route requests to different Large Language Models (LLMs) based on model preferences.
 
