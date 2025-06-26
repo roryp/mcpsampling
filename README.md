@@ -4,7 +4,23 @@ A comprehensive demonstration of the Model Context Protocol (MCP) using Spring A
 
 ![sequence](./sequence.png)
 
-## 🏗️ Project Structure
+## � Key Concepts
+
+### What is MCP Sampling?
+MCP (Model Context Protocol) sampling allows servers to request LLM completions from clients during tool execution. This enables:
+- **Dynamic content generation** - Servers can request creative explanations from different models
+- **Model routing** - Clients can route requests to different LLMs based on hints
+- **Enhanced responses** - Combine computational results with AI-generated narratives
+
+### How It Works
+1. **Client** calls an MCP tool (e.g., calculator)
+2. **Server** performs the computation
+3. **Server** requests creative explanations via sampling
+4. **Client** routes sampling requests to appropriate LLMs
+5. **Server** combines results with AI explanations
+6. **Client** receives enriched response
+
+## �🏗️ Project Structure
 
 This repository contains two main components:
 
@@ -89,6 +105,54 @@ cd ../mcp-sampling-client
 ./mvnw clean install -DskipTests
 ```
 
+### Quick Start Script
+For training sessions, use this script to quickly set up everything:
+
+```bash
+#!/bin/bash
+# save as: quick-start.sh
+
+echo "🚀 MCP Sampling Demo Quick Start"
+
+# Check prerequisites
+if ! command -v java &> /dev/null; then
+    echo "❌ Java not found. Please install Java 17+"
+    exit 1
+fi
+
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "❌ OPENAI_API_KEY not set"
+    echo "Run: export OPENAI_API_KEY=your-key-here"
+    exit 1
+fi
+
+# Start Ollama
+echo "🤖 Starting Ollama..."
+ollama serve &
+OLLAMA_PID=$!
+sleep 5
+
+# Build projects
+echo "🔨 Building projects..."
+cd mcp-calculator-webmvc-server && ./mvnw clean install -DskipTests
+cd ../mcp-sampling-client && ./mvnw clean install -DskipTests
+
+# Start server
+echo "🖥️ Starting MCP server..."
+cd ../mcp-calculator-webmvc-server
+java -jar target/*.jar &
+SERVER_PID=$!
+sleep 10
+
+# Run client
+echo "💬 Running MCP client..."
+cd ../mcp-sampling-client
+java -jar target/*.jar
+
+# Cleanup
+kill $SERVER_PID $OLLAMA_PID
+```
+
 ## 🏃 Running the Applications
 
 ### Step 1: Start the MCP Server
@@ -122,6 +186,43 @@ The client will:
 3. Route different parts of the response to different AI models
 4. Combine creative responses from both OpenAI and Ollama
 
+## 📋 Example Output
+
+When you run the client, you'll see output similar to:
+
+```
+> USER: What is 2+2 and give me the result in EUR?
+Please incorporate all creative responses from all LLM providers.
+After the other providers add a poem that synthesizes the the poems from all the other providers.
+
+MCP LOGGING: [info] Received sampling request with model hint: openai
+MCP LOGGING: [info] Received sampling request with model hint: ollama
+
+> ASSISTANT: Let me calculate 2+2 and convert it to EUR for you.
+
+The answer is 4, which equals approximately 3.68 EUR (at current exchange rate of 1 USD = 0.92 EUR).
+
+**OpenAI's Creative Explanation:**
+In the realm where numbers dance and play,
+Two plus two finds its way.
+Four emerges, strong and true,
+Converting currencies, just for you!
+
+**Ollama's Creative Explanation:**
+Mathematics whispers its ancient song,
+Where two pairs unite, they belong.
+The sum of four crosses the ocean wide,
+In Euros now, on Europe's side.
+
+**Synthesized Poem:**
+From silicon minds, both near and far,
+OpenAI and Ollama, like twin stars.
+They sing of numbers in harmonious rhyme,
+Four dollars dancing through space and time.
+Together they weave this numerical tale,
+Where math and poetry never fail.
+```
+
 ## 🛠️ Available Tools
 
 The MCP server provides the following tools:
@@ -134,6 +235,44 @@ The MCP server provides the following tools:
 
 ### Currency Conversion
 - **`convertCurrency`** - Convert amounts between currencies using live exchange rates
+
+## 💻 Code Walkthrough
+
+### Server-Side Sampling Request
+The server initiates sampling when it needs creative content:
+
+```java
+// In SimpleCalculatorService.java
+String explanation = mcpToolCallProvider.sampleModel(
+    "Generate a creative explanation...",
+    "openai"  // Model hint
+).text();
+```
+
+### Client-Side Sampling Handler
+The client's `samplingCustomizer` routes requests to appropriate models:
+
+```java
+@Bean
+McpSyncClientCustomizer samplingCustomizer(...) {
+    return (name, mcpClientSpec) -> {
+        mcpClientSpec.sampling(llmRequest -> {
+            String modelHint = llmRequest.modelPreferences().hints().get(0).name();
+            
+            if ("ollama".equals(modelHint)) {
+                // Route to Ollama
+            } else {
+                // Route to OpenAI or other providers
+            }
+        });
+    };
+}
+```
+
+### Key Points for Training:
+- **Model hints** determine routing (e.g., "ollama", "openai")
+- **Sampling is bidirectional** - server can request from client
+- **Responses are enriched** - combine computation with creativity
 
 ## 🚨 Troubleshooting
 
@@ -172,6 +311,31 @@ ollama list
 - [Model Context Protocol Specification](https://modelcontextprotocol.github.io/specification/)
 - [OpenAI API Documentation](https://platform.openai.com/docs)
 - [Ollama Documentation](https://ollama.com/docs)
+
+## 🎓 Training Exercises
+
+### Exercise 1: Add a New Model Provider
+Try adding support for another LLM provider (e.g., Anthropic Claude):
+1. Add the dependency in `pom.xml`
+2. Configure the API key
+3. Update the `samplingCustomizer` to handle "claude" hints
+
+### Exercise 2: Custom Sampling Prompts
+Modify the server to request different types of creative content:
+- Technical explanations
+- Jokes about the calculation
+- Historical facts about numbers
+
+### Exercise 3: Implement Caching
+Add caching to avoid repeated sampling requests:
+- Cache responses by prompt + model hint
+- Implement TTL for cache entries
+
+### Exercise 4: Error Handling
+Enhance error handling for:
+- Model provider failures
+- Network timeouts
+- Invalid model hints
 
 
 ## 📄 License
