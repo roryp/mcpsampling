@@ -2,9 +2,7 @@
 
 A comprehensive demonstration of the Model Context Protocol (MCP) using Spring AI with multiple AI providers including OpenAI and Ollama. This project showcases how to build both MCP servers and clients that can route requests to different Large Language Models (LLMs) based on model preferences.
 
-![sequence](./sequence.png)
-
-## � Key Concepts
+## Key Concepts
 
 ### What is MCP Sampling?
 MCP (Model Context Protocol) sampling allows servers to request LLM completions from clients during tool execution. This enables:
@@ -20,7 +18,7 @@ MCP (Model Context Protocol) sampling allows servers to request LLM completions 
 5. **Server** combines results with AI explanations
 6. **Client** receives enriched response
 
-## �🏗️ Project Structure
+## Project Structure
 
 This repository contains two main components:
 
