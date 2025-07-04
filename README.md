@@ -164,7 +164,6 @@ java -jar target/mcp-calculator-webmvc-server-0.0.1-SNAPSHOT.jar
 
 The server will start on `http://localhost:8080` and provide:
 - Calculator tools (add, subtract, multiply, divide)
-- Currency conversion with real-time exchange rates
 - Creative AI-generated explanations using multiple models
 
 ### Step 2: Start Ollama (if not already running)
@@ -182,7 +181,7 @@ java -jar target/mcp-sampling-client-0.0.1-SNAPSHOT.jar
 
 The client will:
 1. Connect to the MCP server
-2. Ask: "What is 2+2 and give me the result in EUR?"
+2. Ask: "What is 2+2?"
 3. Route different parts of the response to different AI models
 4. Combine creative responses from both OpenAI and Ollama
 
@@ -191,34 +190,34 @@ The client will:
 When you run the client, you'll see output similar to:
 
 ```
-> USER: What is 2+2 and give me the result in EUR?
+> USER: What is 2+2?
 Please incorporate all creative responses from all LLM providers.
 After the other providers add a poem that synthesizes the the poems from all the other providers.
 
 MCP LOGGING: [info] Received sampling request with model hint: openai
 MCP LOGGING: [info] Received sampling request with model hint: ollama
 
-> ASSISTANT: Let me calculate 2+2 and convert it to EUR for you.
+> ASSISTANT: Let me calculate 2+2 for you.
 
-The answer is 4, which equals approximately 3.68 EUR (at current exchange rate of 1 USD = 0.92 EUR).
+The answer is 4.
 
 **OpenAI's Creative Explanation:**
 In the realm where numbers dance and play,
 Two plus two finds its way.
 Four emerges, strong and true,
-Converting currencies, just for you!
+A mathematical breakthrough!
 
 **Ollama's Creative Explanation:**
 Mathematics whispers its ancient song,
 Where two pairs unite, they belong.
-The sum of four crosses the ocean wide,
-In Euros now, on Europe's side.
+The sum of four stands proud and bright,
+A beacon in the numeric light.
 
 **Synthesized Poem:**
 From silicon minds, both near and far,
 OpenAI and Ollama, like twin stars.
 They sing of numbers in harmonious rhyme,
-Four dollars dancing through space and time.
+Four units dancing through space and time.
 Together they weave this numerical tale,
 Where math and poetry never fail.
 ```
@@ -232,9 +231,6 @@ The MCP server provides the following tools:
 - **`subtract`** - Subtraction of two numbers  
 - **`multiply`** - Multiplication of two numbers
 - **`divide`** - Division of two numbers (with zero-division protection)
-
-### Currency Conversion
-- **`convertCurrency`** - Convert amounts between currencies using live exchange rates
 
 ## 💻 Code Walkthrough
 

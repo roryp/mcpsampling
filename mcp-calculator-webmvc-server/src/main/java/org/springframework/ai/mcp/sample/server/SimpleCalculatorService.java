@@ -15,12 +15,8 @@
 */
 package org.springframework.ai.mcp.sample.server;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CreateMessageResult;
 import io.modelcontextprotocol.spec.McpSchema.LoggingLevel;
@@ -34,10 +30,9 @@ import org.springframework.ai.model.ModelOptionsUtils;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 /**
- * Simple Calculator Service that performs arithmetic operations and currency conversion
+ * Simple Calculator Service that performs arithmetic operations
  * with creative explanations using MCP Sampling.
  * 
  * @author Spring AI MCP Example
@@ -46,44 +41,23 @@ import org.springframework.web.client.RestClient;
 public class SimpleCalculatorService {
 
 	private static final Logger logger = org.slf4j.LoggerFactory.getLogger(SimpleCalculatorService.class);
-
-	private final RestClient restClient;
-	private final ObjectMapper objectMapper;
-	
-	// ExchangeRate-API free tier endpoint
-	private static final String EXCHANGE_API_BASE_URL = "https://open.er-api.com/v6/latest";
-	public SimpleCalculatorService() {
-		this.restClient = RestClient.create();
-		this.objectMapper = new ObjectMapper();
-	}
 	/**
 	 * Calculation result record for MCP sampling
 	 */
-	public record CalculationResult(double a, double b, String operation, double result, String exchangeRate) {
+	public record CalculationResult(double a, double b, String operation, double result) {
 	}
 
-	/**
-	 * Exchange rate response from the API
-	 */
-	public record ExchangeRateResponse(String result, String base_code, JsonNode rates) {
-	}
-
-	@Tool(description = "Perform basic calculation and get exchange rate with creative explanations")
-	public String calculateWithExchangeRate(
+	@Tool(description = "Perform basic calculation with creative explanations")
+	public String calculate(
 			@ToolParam(description = "First number") double a,
 			@ToolParam(description = "Second number") double b,
 			@ToolParam(description = "Operation: add, subtract, multiply, divide") String operation,
-			@ToolParam(description = "Source currency (e.g., USD)") String fromCurrency,
-			@ToolParam(description = "Target currency (e.g., EUR)") String toCurrency,
 			ToolContext toolContext) {
 
 		// Perform the calculation
 		double result = performCalculation(a, b, operation);
 		
-		// Get exchange rate
-		String exchangeRateInfo = getExchangeRate(fromCurrency, toCurrency);
-		
-		CalculationResult calculationResult = new CalculationResult(a, b, operation, result, exchangeRateInfo);
+		CalculationResult calculationResult = new CalculationResult(a, b, operation, result);
 
 		String responseWithExplanations = callMcpSampling(toolContext, calculationResult);
 
@@ -108,47 +82,6 @@ public class SimpleCalculatorService {
 		};
 	}
 	
-	/**
-	 * Get exchange rate between two currencies
-	 */
-	private String getExchangeRate(String fromCurrency, String toCurrency) {
-		try {
-			String from = fromCurrency.trim().toUpperCase();
-			String to = toCurrency.trim().toUpperCase();
-			
-			if (from.equals(to)) {
-				return String.format("1 %s = 1 %s (same currency)", from, to);
-			}
-			
-			String apiUrl = EXCHANGE_API_BASE_URL + "/" + from;
-			
-			String response = restClient
-					.get()
-					.uri(apiUrl)
-					.retrieve()
-					.body(String.class);
-			
-			JsonNode jsonResponse = objectMapper.readTree(response);
-			
-			if (!jsonResponse.path("result").asText("").equals("success")) {
-				return "Exchange rate unavailable due to API error";
-			}
-			
-			JsonNode ratesNode = jsonResponse.path("rates");
-			if (!ratesNode.has(to)) {
-				return String.format("Unsupported currency: %s", to);
-			}
-			
-			double exchangeRate = ratesNode.get(to).asDouble();
-			BigDecimal rounded = BigDecimal.valueOf(exchangeRate).setScale(4, RoundingMode.HALF_UP);
-			
-			return String.format("1 %s = %s %s", from, rounded, to);
-			
-		} catch (Exception e) {
-			logger.error("Failed to get exchange rate: {}", e.getMessage());
-			return "Exchange rate lookup failed: " + e.getMessage();
-		}
-	}
 	public String callMcpSampling(ToolContext toolContext, CalculationResult calculationResult) {
 
 		StringBuilder openAiExplanation = new StringBuilder();
@@ -167,7 +100,7 @@ public class SimpleCalculatorService {
 								.systemPrompt("You are a creative mathematics teacher who explains calculations in an engaging way!")
 								.messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,
 										new McpSchema.TextContent(
-												"Please create a fun and educational explanation for this calculation and exchange rate. Use markdown format:\n"
+												"Please create a fun and educational explanation for this calculation. Use markdown format:\n"
 														+ ModelOptionsUtils.toJsonStringPrettyPrinter(calculationResult)))));
 
 						// Get explanation from OpenAI
@@ -205,7 +138,6 @@ public class SimpleCalculatorService {
 				String.format("**%.2f %s %.2f = %.2f**\n\n", 
 					calculationResult.a(), getOperationSymbol(calculationResult.operation()), 
 					calculationResult.b(), calculationResult.result()) +
-				"**Exchange Rate:** " + calculationResult.exchangeRate() + "\n\n" +
 				"---\n\n" +
 				"### OpenAI Creative Explanation\n" + openAiExplanation.toString() + "\n\n" +
 				"---\n\n" +

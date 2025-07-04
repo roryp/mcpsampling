@@ -70,7 +70,7 @@ public class McpClientApplication {
 			ChatClient chatClient = ChatClient.builder(openAiChatModel).defaultToolCallbacks(mcpToolProvider).build();
 
 			String userQuestion = """
-					What is 2+2 and give me the result in EUR?
+					What is 2+2?
 					Please incorporate all creative responses from all LLM providers.
 					After the other providers add a poem that synthesizes the the poems from all the other providers.
 					""";
